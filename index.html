@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wedding Invitation | Ali & Karina</title>
+    
+    <!-- Подключение шрифтов (Imperial Script добавлен) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Imperial+Script&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* === НОВАЯ ЦВЕТОВАЯ СХЕМА === */
+        :root {
+            /* Античное золото (более насыщенное) */
+            --gold: #a67c00; 
+            /* Темный шоколад для контраста */
+            --dark: #1f1f1f;
+            /* Очень светлый, почти белый фон "слоновая кость" */
+            --bg-tint: #fcfbf8; 
+            
+            /* Цвета конверта (более холодный бежевый) */
+            --envelope-color: #e6e2dd;
+            --envelope-dark: #d1cdc8;
+            
+            /* Стекло */
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(166, 124, 0, 0.2); /* Золотистая рамка */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-tint);
+            color: var(--dark);
+            overflow: hidden; /* Скролл запрещен до открытия */
+        }
+
+        /* === 1. ПОЛНОЭКРАННЫЙ ОВЕРЛЕЙ === */
+        #envelope-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #111; /* Темный фон стола */
+            z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 1500px;
+            transition: opacity 1.5s ease-in-out;
+            overflow: hidden;
+        }
+
+        /* === 2. КОНВЕРТ === */
+        .envelope-wrapper {
+            position: relative;
+            width: 500px; height: 340px;
+            background: var(--envelope-color);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.6);
+            transform-style: preserve-3d;
+            transition: transform 1.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .flap {
+            position: absolute; top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 250px solid transparent;
+            border-right: 250px solid transparent;
+            border-top: 190px solid var(--envelope-dark);
+            transform-origin: top;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .pocket {
+            position: absolute; bottom: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 250px solid var(--envelope-color);
+            border-right: 250px solid var(--envelope-color);
+            border-bottom: 180px solid #f2f0ed;
+            border-top: 160px solid transparent;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .letter-card {
+            position: absolute;
+            top: 10px; left: 20px; right: 20px; bottom: 10px;
+            background: #fff;
+            z-index: 2;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            transition: transform 1s ease 0.6s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .wax-seal {
+            position: absolute; top: 55%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px; height: 80px;
+            background: radial-gradient(circle, #a67c00 0%, #7a5c00 100%);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            z-index: 11;
+            display: flex; justify-content: center; align-items: center;
+            color: #fff; font-family: 'Imperial Script', cursive; font-size: 2.2rem;
+            border: 3px solid rgba(255,255,255,0.3);
+            transition: opacity 0.4s ease;
+            animation: pulse-seal 3s infinite ease-in-out;
+        }
+
+        /* === МОБИЛЬНАЯ АДАПТАЦИЯ КОНВЕРТА === */
+        @media (max-width: 600px) {
+            .envelope-wrapper { width: 300px; height: 200px; }
+            .flap { border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 130px solid var(--envelope-dark); }
+            .pocket { border-left: 150px solid var(--envelope-color); border-right: 150px solid var(--envelope-color); border-bottom: 110px solid #f2f0ed; border-top: 90px solid transparent; }
+            .letter-card { top: 5px; left: 10px; right: 10px; bottom: 5px; }
+            .wax-seal { width: 60px; height: 60px; font-size: 1.5rem; }
+            .tap-hint { bottom: -50px; font-size: 0.8rem; }
+        }
+
+        /* === ОБЩИЕ СТИЛИ КОНВЕРТА === */
+        .envelope-inner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #dedad5; z-index: 1; }
+        .letter-text { font-family: 'Imperial Script', cursive; font-size: 3.5rem; color: var(--gold); opacity: 0; transition: opacity 0.5s ease 0.8s; }
+        @keyframes pulse-seal { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.05); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        .tap-hint { position: absolute; bottom: -60px; left: 0; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 1rem; text-transform: uppercase; letter-spacing: 3px; animation: hint-fade 2s infinite; }
+        @keyframes hint-fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* === АНИМАЦИЯ ОТКРЫТИЯ === */
+        .envelope-open .flap { transform: rotateX(180deg); z-index: 0; }
+        .envelope-open .wax-seal { opacity: 0; pointer-events: none; }
+        .envelope-open .tap-hint { opacity: 0; }
+        .envelope-open .letter-card { transform: translateY(-150px); z-index: 6; }
+        .envelope-open .letter-text { opacity: 1; }
+        @media (max-width: 600px) { .envelope-open .letter-card { transform: translateY(-80px); } }
+        .overlay-zoom-out { opacity: 0; pointer-events: none; transform: scale(1.5); }
+
+
+        /* === ОСНОВНОЙ КОНТЕНТ === */
+        #main-content { opacity: 0; transition: opacity 2s ease; }
+        #main-content.visible { opacity: 1; }
+
+        /* === СТАНДАРТНЫЕ СТИЛИ САЙТА === */
+        .texture-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjAzIi8+PC9zdmc+');
+            pointer-events: none; z-index: 999; opacity: 0.5;
+        }
+
+        /* Более теплый и "чистый" фон */
+        body::before { content: ''; position: fixed; top: -10%; left: -10%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(166, 124, 0, 0.08), transparent 70%); z-index: -1; filter: blur(80px); }
+        body::after { content: ''; position: fixed; bottom: -10%; right: -10%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(166, 124, 0, 0.05), transparent 70%); z-index: -1; filter: blur(80px); }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        .section { padding: 100px 0; position: relative; }
+        
+        .glass-card {
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px;
+            box-shadow: 0 20px 40px rgba(166, 124, 0, 0.05); margin: 20px 0;
+        }
+
+        .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1s ease; }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; padding-top: 50px; }
+        
+        /* ОБНОВЛЕННЫЕ ИМЕНА */
+        .hero-names { margin-bottom: 60px; position: relative; z-index: 2; }
+        .names-single-line {
+            font-family: 'Imperial Script', cursive; /* НОВЫЙ ШРИФТ */
+            color: var(--dark); line-height: 1.2; white-space: nowrap;
+            font-size: 7.5rem; 
+            text-shadow: 0px 0px 0px transparent; /* Убрал тень для чистоты */
+        }
+
+        .photo-composition { position: relative; width: 500px; height: 450px; margin: 0 auto 30px; }
+        .photo-card {
+            position: absolute; width: 240px; height: 320px;
+            object-fit: cover; border-radius: 200px 200px 0 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.5s; background-color: #f0f0f0; border: 4px solid #fff;
+        }
+        .p-1 { top: 0; left: 0; transform: rotate(-6deg); z-index: 1; }
+        .p-2 { bottom: 0; right: 0; transform: rotate(6deg); z-index: 2; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .restaurant-preview { width: 100%; height: 400px; object-fit: cover; border-radius: 10px; filter: sepia(20%); }
+        .info-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; margin-bottom: 20px; color: var(--dark); }
+        
+        .btn-gold {
+            display: inline-block; padding: 18px 45px; background: var(--gold); color: #fff;
+            text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; font-weight: 600;
+            text-decoration: none; border: 1px solid var(--gold); cursor: pointer; transition: 0.3s;
+            border-radius: 50px; /* Более округлые кнопки */
+        }
+        .btn-gold:hover { background: transparent; color: var(--gold); }
+
+        /* ОБНОВЛЕННЫЙ ТЕЛЕГРАМ БЛОК */
+        .telegram-block {
+            text-align: center; 
+            background: linear-gradient(135deg, #d4af37 0%, #a67c00 100%); /* Золотой градиент */
+            color: white; border-radius: 20px; padding: 60px 20px; 
+            box-shadow: 0 20px 50px rgba(166, 124, 0, 0.2);
+        }
+        .btn-white {
+            background: white; color: var(--gold); /* Текст цвета золота */
+            padding: 15px 40px; border-radius: 50px;
+            text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px;
+        }
+
+        .countdown-wrap { display: flex; justify-content: center; gap: 30px; margin-top: 40px; flex-wrap: wrap; }
+        .time-box {
+            width: 100px; height: 100px; border: 1px solid var(--gold); border-radius: 50%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .time-num { font-size: 2rem; font-family: 'Cormorant Garamond', serif; color: var(--dark); }
+
+        footer { text-align: center; padding: 60px 0; border-top: 1px solid rgba(0,0,0,0.05); }
+        .footer-names { font-family: 'Imperial Script', cursive; font-size: 4rem; color: var(--gold); margin-top: 20px; }
+
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; opacity: 0; transition: opacity 0.4s; justify-content: center; align-items: center; }
+        .modal.open { display: flex; opacity: 1; }
+        .modal-body { background: #fff; padding: 50px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; border-radius: 10px; }
+        .form-input { width: 100%; border: none; border-bottom: 1px solid #ddd; padding: 15px 0; margin-bottom: 25px; outline: none; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; }
+        .custom-radio { display: block; margin: 15px 0; cursor: pointer; position: relative; padding-left: 35px; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
+        .custom-radio input { position: absolute; opacity: 0; cursor: pointer; }
+        .checkmark { position: absolute; top: 3px; left: 0; height: 18px; width: 18px; border: 1px solid #ccc; border-radius: 50%; }
+        .custom-radio input:checked ~ .checkmark { background-color: var(--gold); border-color: var(--gold); }
+        .close-icon { position: absolute; top: 20px; right: 20px; font-size: 2rem; cursor: pointer; }
+
+        .music-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--dark); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; border: 2px solid var(--gold); }
+
+        /* === АДАПТИВНОСТЬ (ЗАМЕНИТЬ ВЕСЬ НИЖНИЙ БЛОК НА ЭТО) === */
+        @media (max-width: 768px) {
+            /* Планшеты и большие телефоны */
+            .names-single-line { 
+                font-size: 3.5rem; /* Уменьшили с 4.5rem */
+            }
+            
+            .info-grid { grid-template-columns: 1fr; }
+            .photo-composition { width: 340px; height: 440px; } /* Увеличенные рамки для мобил */
+            .photo-card { width: 200px; height: 280px; }        /* Увеличенные рамки для мобил */
+            .p-1 { left: -20px; }
+            .p-2 { right: -20px; }
+        }
+
+        /* === СПЕЦИАЛЬНО ДЛЯ ОБЫЧНЫХ ТЕЛЕФОНОВ (iPhone, Android) === */
+        @media (max-width: 480px) {
+            .names-single-line { 
+                font-size: 3.5rem !important; /* Еще меньше, чтобы влезло "Карина" */
+            }
+            
+            /* Чуть двигаем фото, если они будут мешать именам */
+            .hero-names { margin-bottom: 40px; }
+        }
+
+        /* === ДЛЯ ОЧЕНЬ УЗКИХ ЭКРАНОВ (iPhone SE, mini) === */
+        @media (max-width: 360px) {
+            .names-single-line { 
+                font-size: 2.2rem !important; /* Максимально компактно */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="texture-overlay"></div>
+
+    <audio id="audio" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    <div class="music-btn" onclick="toggleAudio()" style="display: none;" id="visibleMusicBtn">🎵</div>
+
+    <!-- 1. КОНВЕРТ -->
+    <div id="envelope-overlay">
+        <div class="envelope-wrapper" id="envelope" onclick="openEnvelope()">
+            <div class="envelope-inner"></div>
+            <div class="letter-card">
+                <div class="letter-text">A & K</div>
+            </div>
+            <div class="pocket"></div>
+            <div class="flap"></div>
+            <div class="wax-seal">
+                <span>A&K</span>
+            </div>
+            <div class="tap-hint">Нажмите, чтобы открыть</div>
+        </div>
+    </div>
+
+    <!-- 2. ОСНОВНОЙ САЙТ -->
+    <div id="main-content">
+        
+        <!-- БЛОК 1: ГЕРОЙ -->
+        <section class="hero">
+            <div class="container fade-up" style="width: 100%;">
+                
+                <!-- Надпись "Мы женимся" УДАЛЕНА -->
+                
+                <div class="hero-names">
+                    <div class="names-single-line">
+                        Али <span style="color: var(--gold); font-size: 0.8em;">&</span> Карина
+                    </div>
+                </div>
+                
+                <div class="photo-composition">
+                    <img src="background1.jpg" class="photo-card p-1" alt="Groom" onerror="this.style.background='#eee'">
+                    <img src="background2.jpg" class="photo-card p-2" alt="Bride" onerror="this.style.background='#ddd'">
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            
+            <!-- БЛОК 2: ИНФО -->
+            <section class="section fade-up">
+                <div class="glass-card">
+                    <div class="info-grid">
+                        <div class="info-content">
+                            <!-- ДАТА ИЗМЕНЕНА -->
+                            <div style="font-family: 'Imperial Script', cursive; font-size: 4rem; color: var(--gold); line-height: 1; margin-bottom: 20px;">12.09.2026</div>
+
+                            <h2>Дорогие Гости!</h2>
+                            <p>В нашей жизни есть моменты, которые хочется разделить с самыми близкими. Наша свадьба — именно такой день.</p>
+                            <p>Мы будем счастливы видеть вас среди гостей, чтобы вместе создать воспоминания, которые останутся с нами навсегда.</p>
+                            
+                            <div style="border-left: 3px solid var(--gold); padding-left: 20px; margin: 30px 0;">
+                                <h3 style="color: var(--gold); margin-bottom: 10px;">МЕСТО ПРОВЕДЕНИЯ</h3>
+                                <p style="margin-bottom: 5px; color: var(--dark);"><strong>Ресторан "Ridada Residence"</strong></p>
+                                <p>г. Нальчик, кп. Вольный Аул,<br>ул. 2-й Таманской Дивизии, д. 31а</p>
+                                <p style="font-size: 0.9rem; margin-top: 10px; color: var(--gold);">Сбор гостей: 16:00 (время уточняется)</p>
+                            </div>
+
+                            <a href="https://yandex.ru/maps/?text=г.+Нальчик,+кп.+Вольный+Аул,+ул.+2-й+Таманской+Дивизии,+д.+31а" target="_blank" class="btn-gold">Проложить маршрут</a>
+                        </div>
+                        <div>
+                            <img src="restaurant.png" class="restaurant-preview" alt="Место проведения" onerror="this.style.background='#eee'">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- БЛОК 3: TELEGRAM (ОБНОВЛЕННЫЙ ЦВЕТ) -->
+            <section class="section fade-up">
+                <div class="telegram-block">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">✈️</div>
+                    <h2>СВАДЕБНЫЙ ЧАТ</h2>
+                    <p style="max-width: 600px; margin: 0 auto; color: rgba(255,255,255,0.9);">
+                        Чтобы не потеряться, обмениваться фото и быть в курсе всех новостей, мы создали закрытый канал в Telegram.
+                    </p>
+                    <a href="https://t.me/wedding_Ali_Karina" class="btn-white" target="_blank">ВСТУПИТЬ В ЧАТ</a>
+                </div>
+            </section>
+
+            <!-- БЛОК 5: ТАЙМЕР (ДАТА 12.09) -->
+            <section class="section fade-up" style="text-align: center;">
+                <h2 style="font-family: 'Imperial Script', cursive; font-size: 4rem; color: var(--gold); margin-bottom: 20px;">До начала торжества</h2>
+                <div class="countdown-wrap" id="timer">
+                    <div class="time-box">
+                        <span class="time-num" id="d">0</span>
+                        <span style="font-size: 0.7rem; text-transform: uppercase;">дней</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-num" id="h">0</span>
+                        <span style="font-size: 0.7rem; text-transform: uppercase;">часов</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-num" id="m">0</span>
+                        <span style="font-size: 0.7rem; text-transform: uppercase;">минут</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-num" id="s">0</span>
+                        <span style="font-size: 0.7rem; text-transform: uppercase;">сек</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- БЛОК 4: АНКЕТА (ДАТА 10.09) -->
+            <section class="section fade-up">
+                <div class="glass-card" style="text-align: center; padding: 80px 20px;">
+                    <h2 style="font-size: 2.5rem; font-family: 'Cormorant Garamond', serif;">RSVP</h2>
+                    <p style="color: var(--gold); margin-bottom: 20px;">Пожалуйста, подтвердите свое присутствие до 10.09.2026</p>
+                    <button class="btn-gold" style="margin-top: 50px;" onclick="openModal()">Заполнить анкету</button>
+                </div>
+            </section>
+
+        </div>
+
+        <footer class="fade-up">
+            <p style="font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;">Мы ждем вас!</p>
+            <div class="footer-names">Али & Карина</div>
+        </footer>
+
+    </div>
+
+    <!-- МОДАЛКА -->
+    <div class="modal" id="modal">
+        <div class="modal-body">
+            <span class="close-icon" onclick="closeModal()">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 1.8rem; font-family: 'Cormorant Garamond', serif;">Анкета гостя</h2>
+            
+            <form onsubmit="submitForm(event)">
+                <input type="text" class="form-input" name="name" placeholder="Ваши Имя и Фамилия" required>
+                
+                <h4 style="margin: 20px 0 10px; font-family: 'Cormorant Garamond', serif;">Сможете ли вы прийти?</h4>
+                <label class="custom-radio">
+                    <input type="radio" name="status" value="yes" required>
+                    <span class="checkmark"></span>
+                    С удовольствием приду/мы придем
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="status" value="no">
+                    <span class="checkmark"></span>
+                    К сожалению, не смогу
+                </label>
+
+                <button type="submit" class="btn-gold" style="width: 100%; margin-top: 30px; border: none;">Отправить ответ</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // === ЛОГИКА ОТКРЫТИЯ ===
+        function openEnvelope() {
+            const audio = document.getElementById('audio');
+            audio.play().then(() => {
+                document.getElementById('visibleMusicBtn').style.display = 'flex';
+            }).catch(e => console.log("Audio play blocked", e));
+
+            const envelopeOverlay = document.getElementById('envelope-overlay');
+            const wrapper = document.getElementById('envelope');
+            
+            wrapper.classList.add('envelope-open');
+            
+            setTimeout(() => {
+                envelopeOverlay.style.transform = "scale(2)";
+                envelopeOverlay.style.opacity = "0";
+            }, 1200);
+
+            setTimeout(() => {
+                envelopeOverlay.style.display = 'none';
+                document.body.style.overflowY = 'auto';
+                document.getElementById('main-content').classList.add('visible');
+            }, 2000);
+        }
+
+        // === СТАНДАРТНЫЕ СКРИПТЫ ===
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        // ДАТА СВАДЬБЫ ОБНОВЛЕНА: 12 Сентября 2026
+        const weddingDate = new Date('2026-09-12T00:00:00');
+        function updateTimer() {
+            const now = new Date();
+            const diff = weddingDate - now;
+            if(diff < 0) return;
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / (1000 * 60)) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+            document.getElementById('d').innerText = d;
+            document.getElementById('h').innerText = h;
+            document.getElementById('m').innerText = m;
+            document.getElementById('s').innerText = s;
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        const modal = document.getElementById('modal');
+        function openModal() {
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            modal.classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) closeModal();
+        });
+
+        function submitForm(e) {
+            e.preventDefault();
+            // !!! ВСТАВЬ СВОЮ ССЫЛКУ !!!
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzAtJUrFjDh1DH4YXbgrZVNc78WC3VdYsAqWdpxle94fJRSDtuR--Dn9uQz3ezkBIZPA/exec"; 
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Отправка...";
+            btn.disabled = true;
+
+            const form = e.target;
+            const data = {
+                name: form.name.value,
+                status: form.status.value === 'yes' ? 'Придет' : 'Не сможет',
+                alcohol: "-" 
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert("Спасибо! Ваша анкета успешно получена.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+                closeModal();
+                form.reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Ошибка отправки.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function toggleAudio() {
+            const btn = document.getElementById('visibleMusicBtn');
+            if(audio.paused) {
+                audio.play();
+                btn.innerText = "🎵";
+                btn.style.animation = "pulse 2s infinite";
+            } else {
+                audio.pause();
+                btn.innerText = "🔇";
+                btn.style.animation = "none";
+            }
+        }
+    </script>
+</body>
+</html>
